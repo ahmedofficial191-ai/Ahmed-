@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>يا أمي</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Tajawal',sans-serif;min-height:100vh;overflow:hidden;background:linear-gradient(135deg,#ff9a9e 0%,#fad0c4 40%,#ffecd2 100%);}
+
+  .floating{position:fixed;pointer-events:none;font-size:22px;animation:floatUp 6s linear infinite;opacity:0;}
+  @keyframes floatUp{0%{opacity:0;transform:translateY(0) scale(1);}10%{opacity:1;}90%{opacity:.7;}100%{opacity:0;transform:translateY(-100vh) scale(1.3) rotate(20deg);}}
+
+  #page1,#page2{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;transition:opacity .6s;}
+  #page2{opacity:0;pointer-events:none;}
+
+  .card{background:rgba(255,255,255,.55);backdrop-filter:blur(12px);border-radius:32px;padding:2.5rem 3rem;border:1.5px solid rgba(255,255,255,.8);box-shadow:0 8px 40px rgba(255,100,130,.18);}
+
+  .rose-row{display:flex;justify-content:center;gap:8px;margin-bottom:1rem;font-size:32px;}
+
+  h1{font-size:28px;font-weight:900;color:#c0115e;margin-bottom:.4rem;direction:rtl;text-shadow:0 2px 8px rgba(192,17,94,.12);}
+  .sub{font-size:16px;color:#e05080;margin-bottom:2rem;direction:rtl;}
+
+  .btn-row{display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:90px;}
+
+  .btn-yes{
+    font-family:'Tajawal',sans-serif;font-weight:700;font-size:20px;
+    padding:14px 44px;border-radius:50px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#ff6b9d,#c0115e);
+    color:#fff;box-shadow:0 4px 20px rgba(192,17,94,.35);
+    transition:transform .25s,font-size .35s,padding .35s,box-shadow .25s;
+  }
+  .btn-yes:hover{transform:scale(1.07);box-shadow:0 6px 28px rgba(192,17,94,.5);}
+
+  .btn-no{
+    font-family:'Tajawal',sans-serif;font-weight:700;font-size:20px;
+    padding:14px 44px;border-radius:50px;border:2px solid #ff9ab5;cursor:pointer;
+    background:rgba(255,255,255,.7);color:#e05080;
+    transition:transform .25s,font-size .35s,padding .35s;
+  }
+  .btn-no:hover{transform:scale(1.05);}
+
+  #page2.show{opacity:1;pointer-events:all;}
+
+  .heart-wrap{margin-bottom:1.5rem;}
+  svg#hsvg{filter:drop-shadow(0 14px 36px rgba(220,50,100,.22));}
+
+  /* prettier heart drawing */
+  #heart-outline{
+    fill: none;
+    stroke: url(#heart-grad);
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  #heart-glow{
+    fill: none;
+    stroke: rgba(255,70,140,.35);
+    stroke-width: 7.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: blur(1.2px);
+    opacity: .0;
+  }
+  #heart-fill{
+    fill: rgba(232,24,74,0);
+    stroke: none;
+    transform-origin: 50% 60%;
+  }
+
+  .draw{
+    stroke-dasharray: var(--dash, 1);
+    stroke-dashoffset: var(--dash, 1);
+    animation: drawLine 1.7s cubic-bezier(.2,.9,.2,1) forwards;
+  }
+  .glowOn{
+    animation: glowIn .8s ease forwards .55s;
+  }
+  .fillIn{
+    animation: fillIn 1.0s ease forwards .95s, pop 1.2s ease-in-out infinite 2.1s;
+  }
+
+  @keyframes drawLine{ to { stroke-dashoffset: 0; } }
+  @keyframes glowIn{ to { opacity: 1; } }
+  @keyframes fillIn{ to { fill: rgba(232,24,74,1); } }
+  @keyframes pop{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.03); }
+  }
+
+  #love-msg{font-size:30px;font-weight:900;color:#c0115e;direction:ltr;opacity:0;transform:scale(.8);transition:opacity .9s,transform .9s;text-shadow:0 2px 12px rgba(192,17,94,.2);}
+  #love-msg.show{opacity:1;transform:scale(1);}
+
+  .petals{position:fixed;inset:0;pointer-events:none;overflow:hidden;}
+  .petal{position:absolute;font-size:20px;animation:petalFall 4s linear forwards;opacity:0;}
+  @keyframes petalFall{0%{opacity:0;transform:translateY(-30px) rotate(0deg);}10%{opacity:1;}100%{opacity:0;transform:translateY(110vh) rotate(720deg);}}
+</style>
+</head>
+<body>
+
+<div id="floaters"></div>
+<div class="petals" id="petals"></div>
+
+<div id="page1">
+  <div class="card">
+    <div class="rose-row">🌹🌸🌷🌸🌹</div>
+    <h1>يا أمي الغالية 💕</h1>
+    <p class="sub">أنا عارف إني غلطت… وقلبي مش هايريحني غير لما تسامحيني</p>
+    <div class="btn-row" id="btn-row">
+      <button class="btn-yes" id="btn-yes" onclick="handleYes()">أيوه هسامحك 💖</button>
+      <button class="btn-no"  id="btn-no"  onclick="handleNo()">لأ 😤</button>
+    </div>
+  </div>
+</div>
+
+<div id="page2">
+  <div class="card" style="min-width:280px;">
+    <div class="heart-wrap">
+      <svg id="hsvg" width="180" height="160" viewBox="0 0 100 90">
+        <defs>
+          <linearGradient id="heart-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#ff3d8d"/>
+            <stop offset="50%" stop-color="#e8184a"/>
+            <stop offset="100%" stop-color="#b10f45"/>
+          </linearGradient>
+        </defs>
+
+        <path id="heart-glow"
+          d="M50 78 C12 54,4 18,24 13 C34 8,45 17,50 28 C55 17,66 8,76 13 C96 18,88 54,50 78Z"/>
+        <path id="heart-outline"
+          d="M50 78 C12 54,4 18,24 13 C34 8,45 17,50 28 C55 17,66 8,76 13 C96 18,88 54,50 78Z"/>
+        <path id="heart-fill"
+          d="M50 78 C12 54,4 18,24 13 C34 8,45 17,50 28 C55 17,66 8,76 13 C96 18,88 54,50 78Z"/>
+      </svg>
+    </div>
+    <div id="love-msg">I love you, Mama 💗</div>
+  </div>
+</div>
+
+<script>
+const emojis = ['💕','💖','💗','💓','✨','🌸','🌹','💝','💞','🌷'];
+const floaters = document.getElementById('floaters');
+
+function makeFloater(){
+  const el = document.createElement('div');
+  el.className = 'floating';
+  el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  el.style.left = Math.random()*100+'vw';
+  el.style.top  = Math.random()*100+'vh';
+  el.style.animationDelay = Math.random()*6+'s';
+  el.style.fontSize = (16+Math.random()*18)+'px';
+  floaters.appendChild(el);
+  setTimeout(()=>el.remove(), 7000);
+}
+setInterval(makeFloater,600);
+for(let i=0;i<8;i++) setTimeout(makeFloater,i*200);
+
+let noCount = 0;
+const btnNo  = document.getElementById('btn-no');
+const btnYes = document.getElementById('btn-yes');
+
+function handleNo(){
+  if(noCount >= 2){ runAway(); return; }
+  noCount++;
+  const noSizes  = [20,13,9];
+  const yesSizes = [20,26,34];
+  const noePads  = ['14px 44px','9px 22px','5px 12px'];
+  const yesPads  = ['14px 44px','18px 56px','24px 72px'];
+  btnNo.style.fontSize  = noSizes[noCount]+'px';
+  btnNo.style.padding   = noePads[noCount];
+  btnYes.style.fontSize = yesSizes[noCount]+'px';
+  btnYes.style.padding  = yesPads[noCount];
+  if(noCount===2){
+    btnNo.textContent='لأ 😠';
+    // after two "No" clicks, start escaping on hover
+    btnNo.addEventListener('mouseenter', runAway);
+    btnNo.addEventListener('mousemove', runAway);
+  }
+}
+
+function runAway(){
+  const r  = btnNo.getBoundingClientRect();
+  btnNo.style.position='fixed';
+  btnNo.style.left=r.left+'px';
+  btnNo.style.top =r.top+'px';
+  btnNo.style.zIndex=999;
+  document.body.appendChild(btnNo);
+  const vw=window.innerWidth -btnNo.offsetWidth -20;
+  const vh=window.innerHeight-btnNo.offsetHeight-20;
+  requestAnimationFrame(()=>{
+    btnNo.style.transition='left .5s ease,top .5s ease';
+    requestAnimationFrame(()=>{
+      btnNo.style.left=Math.max(10,Math.random()*vw)+'px';
+      btnNo.style.top =Math.max(10,Math.random()*vh)+'px';
+    });
+  });
+}
+
+function handleYes(){
+  document.getElementById('page1').style.opacity='0';
+  document.getElementById('page1').style.pointerEvents='none';
+  setTimeout(()=>{
+    document.getElementById('page2').classList.add('show');
+    animateHeart();
+    startPetals();
+  },500);
+}
+
+function animateHeart(){
+  const outline = document.getElementById('heart-outline');
+  const glow = document.getElementById('heart-glow');
+  const fill = document.getElementById('heart-fill');
+
+  const len = outline.getTotalLength();
+  outline.style.setProperty('--dash', len);
+  glow.style.setProperty('--dash', len);
+
+  outline.classList.remove('draw');
+  glow.classList.remove('draw','glowOn');
+  fill.classList.remove('fillIn');
+
+  // restart animations reliably
+  void outline.getBoundingClientRect();
+
+  outline.classList.add('draw');
+  glow.classList.add('draw','glowOn');
+  fill.classList.add('fillIn');
+
+  setTimeout(()=>{ document.getElementById('love-msg').classList.add('show'); },2100);
+}
+
+function startPetals(){
+  const petals=document.getElementById('petals');
+  const ps=['🌸','🌹','🌷','💮','🌺','💐'];
+  let count=0;
+  const iv=setInterval(()=>{
+    const el=document.createElement('div');
+    el.className='petal';
+    el.textContent=ps[Math.floor(Math.random()*ps.length)];
+    el.style.left=Math.random()*100+'vw';
+    el.style.animationDelay=Math.random()*1+'s';
+    el.style.fontSize=(16+Math.random()*14)+'px';
+    petals.appendChild(el);
+    setTimeout(()=>el.remove(),5000);
+    if(++count>40) clearInterval(iv);
+  },100);
+}
+</script>
+</body>
+</html>
